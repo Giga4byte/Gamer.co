@@ -1,63 +1,71 @@
 import pygame
 import random
 
-# Initialize pygame module
+# initialize pygame module
 pygame.init()
 
-# Screen dimensions
+# screen dimensions
 WIDTH = 800
 HEIGHT = 600
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Crossy Road Game")
 
-# Colors
+# colors
 WHITE = (255, 255, 255)
-LIGHT_GREEN = (144, 238, 144)  # Softer green for a more appealing look
-DARK_GRAY = (50, 50, 50)  # Road color
+LIGHT_GREEN = (144, 238, 144)  # softer green for a more appealing look
+DARK_GRAY = (50, 50, 50)  # road color
 RED = (255, 0, 0)
 
-# Game clock
+# game clock
 clock = pygame.time.Clock()
 
-# Player settings
+# player settings
 PLAYER_SIZE = 40
 PLAYER_SPEED = 10
 
-# Load assets with transparency
+# load assets with transparency
 player_image = pygame.image.load("player.png").convert_alpha()
 player_image = pygame.transform.scale(player_image, (PLAYER_SIZE, PLAYER_SIZE))
 
-# Load food images (acting as cars)
+# load food images (acting as cars) - unhealthy food
 bad_food_images = [pygame.image.load("doritos.png").convert_alpha(),
                    pygame.image.load("oreo.png").convert_alpha(),
                    pygame.image.load("burger.png").convert_alpha()]
-
+# load food images (acting as cars) - healthy food
 good_food_images = [pygame.image.load("strawberry.png").convert_alpha(),
                      pygame.image.load("lemon.png").convert_alpha(),
                      pygame.image.load("cheese.png").convert_alpha()]
 
-# Resize food images
+# resize food images to fit the correct dimensions
 bad_food_images = [pygame.transform.scale(img, (40, 50)) for img in bad_food_images]
 good_food_images = [pygame.transform.scale(img, (40, 50)) for img in good_food_images]
 
-# Font
+# font
 font = pygame.font.SysFont(None, 40)
 
-# Player class
+'''
+Player class uses Sprite - Sprite makes it easier to handle objects on the screen 
+that needs to collide/move on the screen. So Player is now a child class of the 
+Sprite class in pygame
+'''
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.image = player_image
-        self.rect = self.image.get_rect()
+        self.rect = self.image.get_rect() # set the image as a rectangle
         self.rect.center = (WIDTH // 2, HEIGHT - 50)
 
     def update(self, keys):
+        # move left if LEFT key is pressed and player is not at the left edge
         if keys[pygame.K_LEFT] and self.rect.left > 0:
             self.rect.x -= PLAYER_SPEED
+        # move right if RIGHT key is pressed and player is not at the right edge
         if keys[pygame.K_RIGHT] and self.rect.right < WIDTH:
             self.rect.x += PLAYER_SPEED
+        # same for top - TOP key
         if keys[pygame.K_UP] and self.rect.top > 0:
             self.rect.y -= PLAYER_SPEED
+        # same for bottom - BOTTOM key
         if keys[pygame.K_DOWN] and self.rect.bottom < HEIGHT:
             self.rect.y += PLAYER_SPEED
 
