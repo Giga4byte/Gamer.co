@@ -73,45 +73,52 @@ class Player(pygame.sprite.Sprite):
 class Car(pygame.sprite.Sprite):
     def __init__(self, good=True, y_position=None):
         super().__init__()
+        # choose a random image based on whether it's a good or bad food
         self.image = random.choice(good_food_images if good else bad_food_images)
         self.rect = self.image.get_rect()
+        # set the vertical position (y) — either passed or chosen randomly
         self.rect.y = (y_position) if y_position else random.randint(0, HEIGHT - self.rect.height)
+        # start the object off-screen: either from left or right: right, start at WIDTH (screen edge) ; left, start at -width (just off screen)
         self.rect.x = -self.rect.width if random.choice([True, False]) else WIDTH
+        # speed is randomly set to a value between 5 and 10
         self.speed = random.randint(5, 10) * (-1 if self.rect.x == WIDTH else 1)
         self.good = good
 
     def update(self):
         self.rect.x += self.speed
+        # move horizontally based on speed
         if self.rect.right < 0 or self.rect.left > WIDTH:
+            # if it's completely off-screen, send it back to the opposite side to re-enter
             self.rect.x = -self.rect.width if self.speed > 0 else WIDTH
 
-# Main game function
+# main game function
 def game_loop():
     player = Player()
     all_sprites = pygame.sprite.Group()
     all_sprites.add(player)
 
-    # Define road lanes
-    road_lanes = [HEIGHT // 5 + 30, 2 * HEIGHT // 5 + 30, 3 * HEIGHT // 5 + 30, 4 * HEIGHT // 5 + 30]  # Move lanes 10px down
+    # define y-positions for road lanes
+    road_lanes = [HEIGHT // 5 + 30, 2 * HEIGHT // 5 + 30, 3 * HEIGHT // 5 + 30, 4 * HEIGHT // 5 + 30]  # move lanes 10px down
     
-    # Spawn moving obstacles (cars)
+    # spawn moving obstacles (cars) - creating group for moving objects
     cars = pygame.sprite.Group()
     for lane in road_lanes:
-        for _ in range(2):  # Two cars per lane
+        for _ in range(2):  # two cars per lane
             cars.add(Car(good=random.choice([True, False]), y_position=lane))
     all_sprites.add(cars)
-    
+
+    # initialise score
     score = 0
     game_over = False
 
     while not game_over:
         SCREEN.fill(LIGHT_GREEN)
         
-        # Draw multiple road lanes
+        # draw multiple road lanes
         for lane in road_lanes:
             pygame.draw.rect(SCREEN, DARK_GRAY, (0, lane - 20, WIDTH, 40))
         
-        # Check for events
+        # check for events - closing the window
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 game_over = True
@@ -120,37 +127,37 @@ def game_loop():
         player.update(keys)
         cars.update()
         
-        # Collision with cars
+        # collision detection
         for car in pygame.sprite.spritecollide(player, cars, False):
             if car.good:
                 score += 5
-                car.kill()  # Remove good food once collected
+                car.kill()  # remove good food once collected
             else:
                 game_over = True
         
-        # Display score
+        # display score
         score_text = font.render(f"Score: {score}", True, WHITE)
         SCREEN.blit(score_text, (10, 10))
 
-        # Check if player crossed the road
+        # check if player crossed the road
         if player.rect.top <= 0:
-            player.rect.center = (WIDTH // 2, HEIGHT - 50)  # Reset player position
+            player.rect.center = (WIDTH // 2, HEIGHT - 50)  # reset player position
 
-        # Draw all sprites
+        # draw all sprites
         all_sprites.draw(SCREEN)
 
         pygame.display.update()
 
-        # Control the game speed
+        # control the game speed
         clock.tick(30)
 
-    # Display Game Over message with score
+    # display Game Over message with score
     SCREEN.fill(WHITE)
     game_over_text = font.render(f"Game Over - Score: {score}", True, RED)
     SCREEN.blit(game_over_text, (WIDTH // 2 - 150, HEIGHT // 2 - 20))
     pygame.display.update()
-    pygame.time.wait(2000)  # Wait for 2 seconds before quitting the game
+    pygame.time.wait(2000)  # wait for 2 seconds before quitting the game
     pygame.quit()
 
-# Run the game loop
+# run the game loop
 game_loop()
